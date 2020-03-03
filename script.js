@@ -1,5 +1,7 @@
-var n_rows = 14;
-var n_cols = 14;
+
+
+var n_rows = 6;
+var n_cols = 6;
 var start_table = new Array (n_rows);
 for (var row = 0; row < n_rows; row++) {
     start_table[row] = new Array (n_cols);
@@ -50,8 +52,7 @@ function flood_element (row, col, colour)
 
 
 
-function flood_neighbours (row, col, colour)
-{
+function flood_neighbours (row, col, colour){
     if (row < n_rows - 1)
         test_colour_flood (row + 1, col, colour);
     if (row > 0)
@@ -230,22 +231,21 @@ function translateTable(){
 }
 
 function answerSetup(){
-    // initial_grid = GridState(cgrid, None, None, 0,).make_move(initial_color)
-
+   
    // Translating 2d Object Array into 2d Integer Array
    // This is so that copying grid states is possible
 
 
 
-   let numTable = translateTable();
-    // let numTable = [[5, 5, 3, 3, 3, 1, 6, 4, 2, 6, 4, 1, 6, 1],
-    //          [2, 6, 6, 1, 3, 2, 1, 6, 2, 5, 1, 2, 5, 5],
-    //          [5, 1, 1, 3, 5, 3, 6, 3, 6, 2, 2, 2, 4, 3],
-    //          [1, 4, 5, 6, 1, 4, 4, 1, 1, 3, 1, 3, 4, 6],
-    //          [3, 4, 5, 1, 1, 4, 1, 6, 1, 3, 5, 4, 5, 5],
-    //          [1, 1, 4, 6, 5, 2, 3, 2, 1, 2, 4, 5, 6, 1],
-    //          [2, 4, 6, 2, 3, 6, 3, 4, 6, 1, 3, 2, 6, 6],
-    //          [5, 6, 4, 2, 5, 6, 1, 6, 3, 3, 1, 2, 4, 6],
+    let numTable = translateTable();
+    // let numTable = [[0, 0, 0, 0, 0, 0, 0, 0, 2, 6, 4, 1, 6, 1],
+    //          [2, 6, 6, 1, 3, 2, 1, 6, 2, 0, 1, 2, 5, 5],
+    //          [5, 1, 1, 3, 5, 3, 6, 3, 6, 0, 2, 2, 4, 3],
+    //          [1, 4, 5, 6, 1, 4, 4, 1, 1, 0, 1, 3, 4, 6],
+    //          [3, 4, 5, 1, 1, 4, 1, 6, 1, 0, 5, 4, 5, 5],
+    //          [1, 1, 4, 6, 5, 2, 3, 2, 1, 0, 4, 5, 6, 1],
+    //          [2, 4, 6, 2, 3, 6, 3, 4, 6, 0, 3, 2, 6, 6],
+    //          [5, 6, 4, 2, 5, 6, 1, 6, 3, 0, 1, 2, 4, 6],
     //          [2, 5, 1, 3, 4, 2, 4, 1, 6, 5, 6, 1, 1, 2],
     //          [2, 2, 6, 3, 3, 5, 5, 3, 2, 4, 4, 1, 6, 5],
     //          [6, 3, 2, 4, 1, 2, 2, 4, 1, 6, 1, 1, 5, 2],
@@ -256,12 +256,110 @@ function answerSetup(){
     numTable[0][0] = 0;
 
 
-   initialGrid = new GridState(numTable, null, null, 0).makeMove(initialColor);
-   console.log(initialGrid);
+    
+    initialGrid = new GridState(numTable, null, null, 0).makeMove(initialColor);
+    
+ 
+
+    var start = new Date().getTime();
+    answerGrid = AStar(initialGrid, heuristicBottomRight, avoidBackTrack = true, filtering=true)
+    var end = new Date().getTime()
+    
+    console.log("The Answer Grid", answerGrid);
+    console.log(answerGrid.getAnswer());
+    console.log("Time: " + (end-start)/1000);
+
 }
 
-function AStar (){
+
+function heuristicZero(gridState){
+    return 0;
+}
+
+function heuristicBottomRight(gridState){
+    
+    let dim = gridState.colorGrid.length-1;
    
+
+    let minDistance = Number.MAX_SAFE_INTEGER;
+    let playerPos = gridState.getPlayerPos();
+    
+
+    for(var pos of playerPos){
+        
+        minDistance = Math.min((dim - pos.row) + (dim - pos.col), minDistance);
+    }
+    return minDistance;
+}
+function AStar (
+    initialState,
+    heuristicFunction,
+    avoidBackTrack = false,
+    filtering = false,
+    cutoff = Number.MAX_SAFE_INTEGER,
+    counter = {
+        numEnqueues: 0,
+        numExtends: 0
+    }
+){
+    let frontier = new PriorityQueue()
+    frontier.enqueue(initialState, initialState.getPathLength() + heuristicFunction(initialState))
+    extended = new Set();
+
+    while (!frontier.isEmpty()){
+        qElement = frontier.dequeue();
+        extNode = qElement.element;
+        counter.numExtends += 1;
+
+        console.log(extNode);
+        if (extNode.isGoalState()){
+            return extNode;
+        }
+
+        var enqueue;
+        if (filtering){
+            if (!extended.has(extNode)){
+                extended.add(extNode);
+                enqueue = extNode.generateNextStates();
+            } else{
+                continue;
+            }
+        } else{
+            enqueue = extNode.generateNextStates();
+        }
+
+        if (avoidBackTrack){
+            
+            const index = enqueue.indexOf(extNode.getParent());
+            if (index > -1) {
+                enqueue.splice(index, 1);
+            }
+            
+                
+            
+        }
+
+        if (cutoff!=Number.MAX_SAFE_INTEGER){
+            for (var node of enqueue){
+                if (node.getPathLength() > cutoff){
+                    const index = enqueue.indexOf(5);
+                    if (index > -1) {
+                        array.splice(index, 1);
+                    }
+                }
+                    
+            }
+        }
+
+        counter.numEnqueues += enqueue.length;
+        for (var node of enqueue){
+            frontier.enqueue(node,node.getPathLength()+heuristicFunction(node));
+        }
+        
+    }
+    return null;
+   
+
     
 
     // initialGrid = new GridState(game_table, null, null, 0);

@@ -5,62 +5,15 @@ class GridState{
         this.parent= parent;
         this.lastAction = lastAction;
         this.pathLength = pathLength;
-        this.playerChoice = colorGrid[0][0];
+        
     }
 
 
-    // printColorGrid(){
-    //     let line = "";
-    //     for(var i = 0; i < grid.length; i++){
-    //         for(var j = 0; j < grid[i].length; j++){
-    //             line += grid[i][j] + " ";
-    //         }
-    //         console.log(line);
-    //     }
-    // }
-    // test_colour_flood (grid,row, col, colour){
-    //     if (grid[row][col].flooded)
-    //         return;
-    //     if (grid[row][col].colour == colour) {
-    //         grid[row][col].flooded = true;
-    //         /* Recurse to make sure that we get any connected neighbours. */
-    //         this.flood_neighbours (grid, row, col, colour);
-    //     }
-    // }
 
-    // flood_neighbours (grid, row, col, colour){
-    //     if (row < n_rows - 1)
-    //         this.test_colour_flood (grid, row + 1, col, colour);
-    //     if (row > 0)
-    //         this.test_colour_flood (grid, row - 1, col, colour);
-    //     if (col < n_cols - 1)
-    //         this.test_colour_flood (grid, row, col + 1, colour);
-    //     if (col > 0)
-    //         this.test_colour_flood (grid, row, col - 1, colour);
-    // }
-    // flood_element (grid, row, col, colour){
-    //     grid[row][col].colour = colour;
-    //     grid[row][col].element.className = "piece "+colour;
-    // }
-    // flood(colour){
 
-    //     // Change Color of Initial Player
-
-    //     let nextGrid = this.copyColorGrid();
-    //     for(var row=0; row < n_rows; row++)
-    //         for(var col = 0; col < n_cols; col++)
-    //             if(nextGrid[row][col].flooded)
-    //                 this.flood_element(nextGrid, row, col, colour);
-    //     // Change color of neighbors
-    //     for (var row = 0; row < n_rows; row++)
-    //         for (var col = 0; col < n_cols; col++)
-    //             if (nextGrid[row][col].flooded)
-    //                 this.flood_neighbours (nextGrid, row, col, colour);
-
-    //     return nextGrid;
-
-        
-    // }
+    getPathLength(){
+        return this.pathLength;
+    }
 
     copyGrid(){
         let dim = this.colorGrid.length;
@@ -99,7 +52,7 @@ class GridState{
         let newGrid = this.copyGrid();
       
         let playerPos = this.getPlayerPos()
-        console.log(playerPos)
+        
         
         while (playerPos.length >0){
             let position = playerPos.pop();
@@ -131,27 +84,78 @@ class GridState{
 
 
 
-        const index = nextActions.indexOf(self.lastAction);
-        nextActions.splice(index, 1);
+        const index = nextActions.indexOf(this.lastAction);
+        // Last Action here is negative 1;
+        // console.log("Last Action: ", index);
+        if (index>-1){
+            nextActions.splice(index, 1);
+            
+        }
+        // console.log(nextActions);
+        
         
         for(var i = 0; i < nextActions.length; i++){
             let color = nextActions[i];
-            let s1 = this.flood(color);
-            newStates.push(s1)
+            let s1 = this.makeMove(color);
+
+            // TODO: make a no change function
+            if (this.moveChanged(s1.getColorGrid()))
+                newStates.push(s1)
         }
         return newStates;
     }
 
  
-    all_flooded (){
-        for (var row = 0; row < n_rows; row++) {
-            for (var col = 0; col < n_cols; col++) {
-                if (! game_table[row][col].flooded) {
+    isGoalState(){
+        let color = this.colorGrid[0][0];
+
+        for (var row = 0; row < this.colorGrid.length; row++) {
+            for (var col = 0; col < this.colorGrid[row].length; col++) {
+                if (this.colorGrid[row][col]!=color) {
                     return false;
                 }
             }
         }
         return true;
+    }
+
+    getParent(){
+        return this.parent;
+    }
+
+    moveChanged(grid){
+        for(var row = 0; row < this.colorGrid.length; row++){
+            for (var col = 0; col < this.colorGrid[row].length; col++){
+                if (this.colorGrid[row][col] != grid[row][col]){
+                    return true;
+                }
+            }
+        }
+
+        return false;
+    }
+    getColorGrid(){
+        return this.colorGrid;
+    }
+    getLastAction(){
+        return this.lastAction;
+    }
+
+    getAnswer(){
+        let path = new Array(0);
+        path.push(this.getLastAction());
+        parent = this.getParent();
+
+        while(parent!== null){
+            if (parent.getLastAction() !== null){
+                path.push(parent.getLastAction());
+                
+            }
+            parent=parent.getParent();
+                
+        }
+        path.reverse().splice(0,1);
+        return path;
     }
 
 }
