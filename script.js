@@ -1,7 +1,51 @@
+if(Array.prototype.equals)
+    console.warn("Overriding existing Array.prototype.equals. Possible causes: New API defines the method, there's a framework conflict or you've got double inclusions in your code.");
+// attach the .equals method to Array's prototype to call it on any array
 
 
-var n_rows = 6;
-var n_cols = 6;
+Array.prototype.equals = function (array) {
+    // if the other array is a falsy value, return
+    if (!array)
+        return false;
+
+    // compare lengths - can save a lot of time 
+    if (this.length != array.length)
+        return false;
+
+    for (var i = 0, l=this.length; i < l; i++) {
+        // Check if we have nested arrays
+        if (this[i] instanceof Array && array[i] instanceof Array) {
+            // recurse into the nested arrays
+            if (!this[i].equals(array[i]))
+                return false;       
+        }           
+        else if (this[i] != array[i]) { 
+            // Warning - two different object instances will never be equal: {x:20} != {x:20}
+            return false;   
+        }           
+    }       
+    return true;
+}
+Array.prototype.containsGrid = function(grid){
+    for(var i = 0; i < this.length; i++){
+        if (this[i] instanceof Array )
+            if (this[i].equals(grid)) return true;
+    }
+    return false;
+}
+
+Array.prototype.indexOfGrid = function(grid){
+    for(var i = 0; i < this.length; i++){
+        if (this[i].equals(grid)) return i;
+    }
+    return -1;
+}
+// Hide method from for-in loops
+Object.defineProperty(Array.prototype, "equals", {enumerable: false});
+
+var dim = 14;
+var n_rows = dim;
+var n_cols = dim;
 var start_table = new Array (n_rows);
 for (var row = 0; row < n_rows; row++) {
     start_table[row] = new Array (n_cols);
@@ -49,9 +93,6 @@ function flood_element (row, col, colour)
     game_table[row][col].colour = colour;
     game_table[row][col].element.className = "piece "+colour;
 }
-
-
-
 function flood_neighbours (row, col, colour){
     if (row < n_rows - 1)
         test_colour_flood (row + 1, col, colour);
@@ -230,6 +271,16 @@ function translateTable(){
 
 }
 
+
+function test(){
+    let numTable = [[0,2,3],
+                    [4,5,0],
+                    [4,5,0]];
+    let initialGrid = new GridState(numTable, null, null, 0);
+    
+    // console.log(heuristicColorsLeft(new GridState(numTable, null, null, 0)));
+    // console.log(numTable.containsGrid([1,2,3]));
+}
 function answerSetup(){
    
    // Translating 2d Object Array into 2d Integer Array
@@ -251,18 +302,29 @@ function answerSetup(){
     //          [6, 3, 2, 4, 1, 2, 2, 4, 1, 6, 1, 1, 5, 2],
     //          [4, 6, 6, 6, 2, 5, 2, 4, 6, 2, 1, 2, 3, 3],
     //          [4, 4, 1, 6, 2, 2, 5, 6, 2, 1, 2, 2, 1, 4],
-    //          [1, 1, 4, 6, 5, 3, 5, 1, 5, 5, 2, 5, 6, 6]]
+    //          [1, 1, 4, 6, 5, 3, 5, 1, 5, 5, 2, 5, 6, 6]];
+
+    
     let initialColor = numTable[0][0]
     numTable[0][0] = 0;
-
-
     
     initialGrid = new GridState(numTable, null, null, 0).makeMove(initialColor);
-    
- 
 
+    // var start = new Date().getTime();
+    // answerGrid = AStar(initialGrid, heuristicBottomRight, goalBottomRight, avoidBackTrack = false, filtering=true);
+    // finalGrid = AStar(answerGrid, heuristicColorsLeft, goalFlooded, avoidBackTrack=false, filtering=true);
+    // var end = new Date().getTime()
+
+
+    // var start = new Date().getTime();
+    // console.log("Started...")
+    // answerGrid = AStar(initialGrid, heuristicBottomRight, goalBottomRight, avoidBackTrack = false, filtering=true);
+    // finalGrid = AStar(answerGrid, heuristicColorsLeft, goalFlooded, avoidBackTrack=false, filtering=true);
+    // var end = new Date().getTime()
     var start = new Date().getTime();
-    answerGrid = AStar(initialGrid, heuristicBottomRight, avoidBackTrack = true, filtering=true)
+    console.log("Started...")
+    answerGrid = AStar(initialGrid, heuristicAreaLeft, avoidBackTrack = false, filtering=true);
+    
     var end = new Date().getTime()
     
     console.log("The Answer Grid", answerGrid);
@@ -271,14 +333,31 @@ function answerSetup(){
 
 }
 
+function goalFlooded(gridState){
+    let color = gridState.colorGrid[0][0];
+
+        for (var row = 0; row < gridState.colorGrid.length; row++) {
+            for (var col = 0; col < gridState.colorGrid[row].length; col++) {
+                if (gridState.colorGrid[row][col]!=color) {
+                    return false;
+                }
+            }
+        }
+        return true;
+}
+function goalBottomRight(gridState){
+    return gridState.colorGrid[gridState.dimension-1][gridState.dimension-1] == 0;
+}
 
 function heuristicZero(gridState){
     return 0;
 }
-
+function heuristicAreaLeft(gridState){
+    return gridState.dimension * gridState.dimension - gridState.getPlayerPos().length;
+}
 function heuristicBottomRight(gridState){
     
-    let dim = gridState.colorGrid.length-1;
+    let dim = gridState.dimension;
    
 
     let minDistance = Number.MAX_SAFE_INTEGER;
@@ -291,9 +370,40 @@ function heuristicBottomRight(gridState){
     }
     return minDistance;
 }
+
+function heuristicColorsLeft(gridState){
+    // for (var row = 0; row < gridState.dim; row++){
+    //     for (var col = 0; row < gridState.dim; col++){
+    //         if (gridState[row][col] == 0) break;
+    //         if 
+
+    //     }
+    // }
+    
+    let numColors = 0;
+    colors = [1,2,3,4,5,6]
+
+   
+    for (var c of colors){
+        for (var row of gridState.colorGrid){
+            if (row.indexOf(c) > -1){
+                // colors.splice(colors.indexOf(c),1);
+                numColors+=1;
+                
+                break;
+            }
+        }
+    }
+    return numColors;
+}
+
+function heuristicCombine(gridState){
+    return Math.max(heuristicBottomRight(gridState), heuristicColorsLeft(gridState));
+}
 function AStar (
     initialState,
     heuristicFunction,
+    // isGoalState,
     avoidBackTrack = false,
     filtering = false,
     cutoff = Number.MAX_SAFE_INTEGER,
@@ -304,40 +414,55 @@ function AStar (
 ){
     let frontier = new PriorityQueue()
     frontier.enqueue(initialState, initialState.getPathLength() + heuristicFunction(initialState))
-    extended = new Set();
+    extended = new Array(0);
 
     while (!frontier.isEmpty()){
         qElement = frontier.dequeue();
         extNode = qElement.element;
         counter.numExtends += 1;
 
-        console.log(extNode);
-        if (extNode.isGoalState()){
+        // console.log(extNode);
+        // if (isGoalState(extNode)){
+        //     return extNode;
+        // }
+
+        if(extNode.isGoalState()){
             return extNode;
         }
 
+            
+
+        
+        
         var enqueue;
+        
+        
+       
         if (filtering){
-            if (!extended.has(extNode)){
-                extended.add(extNode);
+            if (!extended.containsGrid(extNode.colorGrid)){
+                extended.push(extNode.colorGrid);
                 enqueue = extNode.generateNextStates();
             } else{
+                // console.log("Filtered")
                 continue;
             }
         } else{
             enqueue = extNode.generateNextStates();
         }
+        
 
-        if (avoidBackTrack){
+        // if (avoidBackTrack){
             
-            const index = enqueue.indexOf(extNode.getParent());
-            if (index > -1) {
-                enqueue.splice(index, 1);
-            }
+        //     // console.log(extNode.getParent());
+        //     if(extNode.getParent() !== null){
+        //         const index = enqueue.containsGrid(extNode.getParent().colorGrid);
             
-                
-            
-        }
+        //         if (index > -1) {
+        //             // console.log("avoid backtrack feature works");
+        //             enqueue.splice(index, 1);
+        //         }
+        //     }
+        // }
 
         if (cutoff!=Number.MAX_SAFE_INTEGER){
             for (var node of enqueue){

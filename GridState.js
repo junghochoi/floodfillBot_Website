@@ -1,7 +1,9 @@
+
 class GridState{
     
     constructor(colorGrid, parent, lastAction, pathLength){
         this.colorGrid = colorGrid;
+        this.dimension = colorGrid.length;
         this.parent= parent;
         this.lastAction = lastAction;
         this.pathLength = pathLength;
@@ -157,5 +159,7 @@ class GridState{
         path.reverse().splice(0,1);
         return path;
     }
+
+    
 
 }
