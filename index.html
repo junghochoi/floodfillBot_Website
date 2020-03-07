@@ -2,75 +2,67 @@
 
 <html>
 
-    <head>
-        <title>Flood Fill</title>
-        <link rel="stylesheet" type="text/css" href="style.css">
-        <!-- <script src="closure-library/closure/goog/base.js"></script> -->
-        <!-- <script src="closure-library/closure/goog/structs/priorityqueue.js"></script> -->
-        <script src="PriorityQueue.js"></script>
-        <script src="GridState.js"></script>
-        <script src="script.js"></script>
-    </head>
+<head>
+    <title>Flood Fill</title>
+    <link rel="stylesheet" type="text/css" href="style.css">
+    <!-- <script src="closure-library/closure/goog/base.js"></script> -->
+    <!-- <script src="closure-library/closure/goog/structs/priorityqueue.js"></script> -->
+    <script src="PriorityQueue.js"></script>
+    <script src="GridState.js"></script>
+    <script src="script.js"></script>
+</head>
 
-    <body>
-        <table>
-            <tr>
+<body>
+    <table>
+        <tr>
             <td valign="top">
                 <table>
-                <tr>
-                    <td valign="top">
-                    <table id="button-table">
-                        <tr>
-                        <td class="button blue" onclick="flood ('blue')">
+                    <tr>
+                        <td valign="top">
+                            <table id="button-table">
+                                <tr>
+                                    <td class="button blue" onclick="flood ('blue')"></td>
+                                    <td class="button red" onclick="flood ('red')"></td>
+                                    <td class="button green" onclick="flood ('green')"></td>
+                                </tr>
+                                <tr>
+                                    <td class="button yellow" onclick="flood ('yellow')"></td>
+                                    <td class="button pink" onclick="flood ('pink')"></td>
+                                    <td class="button purple" onclick="flood ('purple')"></td>
+                                </tr>
+                            </table>
                         </td>
-                        <td class="button red" onclick="flood ('red')">
+                    </tr>
+                    <tr valign="top">
+                        <td id="turn-counter" class="font" valign="top">
+                        Turn: <span id="moves"></span>/<span id="max-moves"></span>
                         </td>
-                        <td class="button green" onclick="flood ('green')">
+                    </tr>
+                    <tr valign="top">
+                        <td valign="top">
+                        <input type="submit" value="New game" onclick="new_game ()">
                         </td>
-                        </tr>
-                        <tr>
-                        <td class="button yellow" onclick="flood ('yellow')">
+                    </tr>
+                    <tr valign="top">
+                        <td valign="top">
+                        <input type="submit" value="Help" onclick="help ()">
                         </td>
-                        <td class="button pink" onclick="flood ('pink')">
+                    </tr>
+                    <tr>
+                        <td>
+                            <label for="time-limit">Time Limit: </label>
+                            <input id="time-limit" type="number">
                         </td>
-                        <td class="button purple" onclick="flood ('purple')">
+                        
+                    </tr>
+
+
+                    <tr valign="top">
+                        <td valign="top">
+                        <input type="submit" value="AI Answer" onclick="answerSetup()">
                         </td>
-                        </tr>
-                    </table>
-                    </td>
-                </tr>
-                <tr valign="top">
-                    <td id="turn-counter" valign="top">
-                    Turn: <span id="moves"></span>/<span id="max-moves"></span>
-                    </td>
-                </tr>
-                <tr valign="top">
-                    <td valign="top">
-                    <input type="submit" value="New game" onclick="new_game ()">
-                    </td>
-                </tr>
-                <tr valign="top">
-                    <td valign="top">
-                    <input type="submit" value="Help" onclick="help ()">
-                    </td>
-                </tr>
-                <tr valign="top">
-                    <td valign="top">
-                    <input type="submit" value="AI Answer" onclick="answerSetup()">
-                    </td>
-                </tr>
-                <tr valign="top">
-                    <td valign="top">
-                    <input type="submit" value="test" onclick="test()">
-                    </td>
-                </tr>
-        <!--
-                <tr valign="top">
-                    <td valign="top">
-                    <input type="submit" value="Solve" onclick="solve ()">
-                    </td>
-                </tr>
-        -->
+                    </tr>
+
                 </table>
             </td>
             <td>
@@ -81,14 +73,32 @@
                 </tbody>
                 </table>
             </td>
-            </tr>
-        </table>
+        </tr>
 
+
+       
         
-    </body>
+    </table>
+
+    <table>
+        <tr id="timer">
+            <!-- <td class="font"> 
+                Time Elapsed: <span id="timer" class="font"></span>
+            </td> -->
+            
+            
+        </tr>
+        <tr>
+            <td>
+            <table>
+                <tr id="game-answer"></tr>
+            </table>
+        </td>
+        </tr>
+    </table>
+
+    
+</body>
 
 
     
-
-
-  </html>

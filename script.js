@@ -43,7 +43,7 @@ Array.prototype.indexOfGrid = function(grid){
 // Hide method from for-in loops
 Object.defineProperty(Array.prototype, "equals", {enumerable: false});
 
-var dim = 14;
+var dim = 15;
 var n_rows = dim;
 var n_cols = dim;
 var start_table = new Array (n_rows);
@@ -224,6 +224,8 @@ function copyGrid(){
 function new_game ()
 {
     clear (get_by_id ("game-table-tbody"));
+    clear (get_by_id ("game-answer"));
+    clear (get_by_id ("timer"))
     create_table ();
 }
 
@@ -235,9 +237,6 @@ function translateTable(){
     for (var i = 0; i < game_table.length; i++){
         translateTable[i]= new Array(game_table.length);
     }
-
-   
-   
 
     for (var row = 0; row < translateTable.length; row++){
         for(var col = 0; col < game_table.length; col++){
@@ -264,11 +263,7 @@ function translateTable(){
             
         }
     }
-
-  
     return translateTable;
-
-
 }
 
 
@@ -282,51 +277,52 @@ function test(){
     // console.log(numTable.containsGrid([1,2,3]));
 }
 function answerSetup(){
-   
-   // Translating 2d Object Array into 2d Integer Array
-   // This is so that copying grid states is possible
 
-
-
-    let numTable = translateTable();
-    // let numTable = [[0, 0, 0, 0, 0, 0, 0, 0, 2, 6, 4, 1, 6, 1],
-    //          [2, 6, 6, 1, 3, 2, 1, 6, 2, 0, 1, 2, 5, 5],
-    //          [5, 1, 1, 3, 5, 3, 6, 3, 6, 0, 2, 2, 4, 3],
-    //          [1, 4, 5, 6, 1, 4, 4, 1, 1, 0, 1, 3, 4, 6],
-    //          [3, 4, 5, 1, 1, 4, 1, 6, 1, 0, 5, 4, 5, 5],
-    //          [1, 1, 4, 6, 5, 2, 3, 2, 1, 0, 4, 5, 6, 1],
-    //          [2, 4, 6, 2, 3, 6, 3, 4, 6, 0, 3, 2, 6, 6],
-    //          [5, 6, 4, 2, 5, 6, 1, 6, 3, 0, 1, 2, 4, 6],
-    //          [2, 5, 1, 3, 4, 2, 4, 1, 6, 5, 6, 1, 1, 2],
-    //          [2, 2, 6, 3, 3, 5, 5, 3, 2, 4, 4, 1, 6, 5],
-    //          [6, 3, 2, 4, 1, 2, 2, 4, 1, 6, 1, 1, 5, 2],
-    //          [4, 6, 6, 6, 2, 5, 2, 4, 6, 2, 1, 2, 3, 3],
-    //          [4, 4, 1, 6, 2, 2, 5, 6, 2, 1, 2, 2, 1, 4],
-    //          [1, 1, 4, 6, 5, 3, 5, 1, 5, 5, 2, 5, 6, 6]];
-
+    if (get_by_id("game-answer").hasChildNodes()){
+        alert("Answer Already Found. Make a new Game")
+        return;
+    }
     
+    let numTable = translateTable();    
     let initialColor = numTable[0][0]
     numTable[0][0] = 0;
     
     initialGrid = new GridState(numTable, null, null, 0).makeMove(initialColor);
 
-    // var start = new Date().getTime();
-    // answerGrid = AStar(initialGrid, heuristicBottomRight, goalBottomRight, avoidBackTrack = false, filtering=true);
-    // finalGrid = AStar(answerGrid, heuristicColorsLeft, goalFlooded, avoidBackTrack=false, filtering=true);
-    // var end = new Date().getTime()
+    var value = Number(get_by_id("time-limit").value) < 2 ? 3 : Number(get_by_id("time-limit").value);
+    
+    console.log(value);
+    var limit = value < 3 ? 3 : value;
+    console.log(limit);
+    
 
-
-    // var start = new Date().getTime();
-    // console.log("Started...")
-    // answerGrid = AStar(initialGrid, heuristicBottomRight, goalBottomRight, avoidBackTrack = false, filtering=true);
-    // finalGrid = AStar(answerGrid, heuristicColorsLeft, goalFlooded, avoidBackTrack=false, filtering=true);
-    // var end = new Date().getTime()
     var start = new Date().getTime();
     console.log("Started...")
-    answerGrid = AStar(initialGrid, heuristicAreaLeft, avoidBackTrack = false, filtering=true);
+    answerGrid = AStar(initialGrid, heuristicAreaLeft, filtering=true, timeLimit = limit);
     
     var end = new Date().getTime()
     
+
+    var timeElapsedSpan = get_by_id("timer")
+    timeElapsedSpan.innerHTML = "Time Elapsed: " + (end-start)/1000;
+    var answerTR = get_by_id("game-answer");
+    
+    
+    for (var color of answerGrid.getAnswer()){
+        var td = create_node("td", answerTR);
+
+        var colorString;
+        if (color==1) colorString = "blue";
+        else if (color==2) colorString = "red";
+        else if (color==3) colorString = "green";
+        else if (color==4) colorString = "yellow";
+        else if (color==5) colorString = "pink";
+        else if (color==6) colorString = "purple";
+
+        td.className="piece " + colorString;
+
+        
+    }
     console.log("The Answer Grid", answerGrid);
     console.log(answerGrid.getAnswer());
     console.log("Time: " + (end-start)/1000);
@@ -400,6 +396,80 @@ function heuristicColorsLeft(gridState){
 function heuristicCombine(gridState){
     return Math.max(heuristicBottomRight(gridState), heuristicColorsLeft(gridState));
 }
+
+
+
+function AStar (
+    initialState,
+    heuristicFunction,
+    // isGoalState,
+    
+    filtering = false,
+    
+    timeLimit = Number.MAX_SAFE_INTEGER,
+    cutoff = Number.MAX_SAFE_INTEGER,
+    counter = {
+        numEnqueues: 0,
+        numExtends: 0
+    }
+){
+    let frontier = new PriorityQueue()
+    frontier.enqueue(initialState, initialState.getPathLength() + heuristicFunction(initialState))
+    let extended = new Array(0);
+
+    var bestNode;
+    let shortestPath = Number.MAX_SAFE_INTEGER;
+    var start = new Date().getTime();
+    while (!frontier.isEmpty() && (new Date().getTime() - start)/1000 < timeLimit){
+        qElement = frontier.dequeue();
+        extNode = qElement.element;
+        counter.numExtends += 1;
+        
+        if (shortestPath <= 25) break;
+        if (extNode.getPathLength() >= shortestPath) continue;
+        if(extNode.isGoalState()){
+            shortestPath = extNode.getPathLength();
+            bestNode = extNode;
+            console.log("Goal State Found, path length = ", shortestPath, ", time elapsed = ", (new Date().getTime() - start)/1000);
+            
+            // return extNode;
+        }
+        var enqueue;
+        if (filtering){
+            if (!extended.containsGrid(extNode.colorGrid)){
+                extended.push(extNode.colorGrid);
+                enqueue = extNode.generateNextStates();
+            } else{
+                // console.log("Filtered")
+                continue;
+            }
+        } else{
+            enqueue = extNode.generateNextStates();
+        }
+        
+
+        if (cutoff!=Number.MAX_SAFE_INTEGER){
+            for (var node of enqueue){
+                if (node.getPathLength() > cutoff){
+                    const index = enqueue.indexOf(5);
+                    if (index > -1) {
+                        array.splice(index, 1);
+                    }
+                }
+                    
+            }
+        }
+
+        counter.numEnqueues += enqueue.length;
+        for (var node of enqueue){
+            frontier.enqueue(node,node.getPathLength()+heuristicFunction(node));
+        }
+        
+    }
+    return bestNode;
+}
+
+/*
 function AStar (
     initialState,
     heuristicFunction,
@@ -429,15 +499,7 @@ function AStar (
         if(extNode.isGoalState()){
             return extNode;
         }
-
-            
-
-        
-        
         var enqueue;
-        
-        
-       
         if (filtering){
             if (!extended.containsGrid(extNode.colorGrid)){
                 extended.push(extNode.colorGrid);
@@ -450,19 +512,6 @@ function AStar (
             enqueue = extNode.generateNextStates();
         }
         
-
-        // if (avoidBackTrack){
-            
-        //     // console.log(extNode.getParent());
-        //     if(extNode.getParent() !== null){
-        //         const index = enqueue.containsGrid(extNode.getParent().colorGrid);
-            
-        //         if (index > -1) {
-        //             // console.log("avoid backtrack feature works");
-        //             enqueue.splice(index, 1);
-        //         }
-        //     }
-        // }
 
         if (cutoff!=Number.MAX_SAFE_INTEGER){
             for (var node of enqueue){
@@ -483,16 +532,7 @@ function AStar (
         
     }
     return null;
-   
-
-    
-
-    // initialGrid = new GridState(game_table, null, null, 0);
-    // console.log(initialGrid);
-    // nextStates = initialGrid.generateNextStates();
-    // console.log(nextStates);
-
-
-
-
 }
+
+
+*/

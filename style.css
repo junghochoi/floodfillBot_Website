@@ -42,6 +42,10 @@ background-color: fuchsia;
     border-spacing:4px;
     vertical-align: top;
 }
-#turn-counter {
+.font {
     font-family: sans-serif;
+}
+
+#time-limit{
+    width: 30px;
 }

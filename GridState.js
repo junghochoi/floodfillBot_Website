@@ -14,7 +14,7 @@ class GridState{
 
 
     getPathLength(){
-        return this.pathLength;
+        return this.pathLength-1;
     }
 
     copyGrid(){
