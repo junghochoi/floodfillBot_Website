@@ -46,6 +46,6 @@ background-color: fuchsia;
     font-family: sans-serif;
 }
 
-#time-limit{
+.input-number{
     width: 30px;
 }

@@ -43,13 +43,13 @@ Array.prototype.indexOfGrid = function(grid){
 // Hide method from for-in loops
 Object.defineProperty(Array.prototype, "equals", {enumerable: false});
 
-var dim = 15;
-var n_rows = dim;
-var n_cols = dim;
-var start_table = new Array (n_rows);
-for (var row = 0; row < n_rows; row++) {
-    start_table[row] = new Array (n_cols);
-}
+var dim;
+var dim = dim;
+var dim = dim;
+// var start_table = new Array (dim);
+// for (var row = 0; row < dim; row++) {
+//     start_table[row] = new Array (dim);
+// }
 var colours = "blue red green yellow pink purple".split (/\s+/);
 
 /* DOM functions. */
@@ -94,11 +94,11 @@ function flood_element (row, col, colour)
     game_table[row][col].element.className = "piece "+colour;
 }
 function flood_neighbours (row, col, colour){
-    if (row < n_rows - 1)
+    if (row < dim - 1)
         test_colour_flood (row + 1, col, colour);
     if (row > 0)
         test_colour_flood (row - 1, col, colour);
-    if (col < n_cols - 1)
+    if (col < dim - 1)
         test_colour_flood (row, col + 1, colour);
     if (col > 0)
         test_colour_flood (row, col - 1, colour);
@@ -113,15 +113,15 @@ function flood (colour, initial)
     moves++;
     append_text (get_by_id ("moves"), moves);
     /* Change the colour of all the flooded elements. */
-    for (var row = 0; row < n_rows; row++) 
-        for (var col = 0; col < n_cols; col++) 
+    for (var row = 0; row < dim; row++) 
+        for (var col = 0; col < dim; col++) 
             if (game_table[row][col].flooded)
                 flood_element (row, col, colour);
 
     /* Set flooded = true for all the neighbouring boxes with the same
        colour. */
-    for (var row = 0; row < n_rows; row++)
-        for (var col = 0; col < n_cols; col++)
+    for (var row = 0; row < dim; row++)
+        for (var col = 0; col < dim; col++)
             if (game_table[row][col].flooded)
                 flood_neighbours (row, col, colour);
     if (all_flooded ()) {
@@ -149,8 +149,8 @@ function test_colour_flood (row, col, colour)
 
 function all_flooded ()
 {
-    for (var row = 0; row < n_rows; row++) {
-        for (var col = 0; col < n_cols; col++) {
+    for (var row = 0; row < dim; row++) {
+        for (var col = 0; col < dim; col++) {
             if (! game_table[row][col].flooded) {
                 return false;
             }
@@ -179,13 +179,14 @@ function random_colour ()
 
 /* The "state of play" is stored in game_table. */
 
-var game_table = new Array (n_rows);
-for (var row = 0; row < n_rows; row++) {
-    game_table[row] = new Array (n_cols);
-    for (var col = 0; col < n_cols; col++) {
-        game_table[row][col] = new Object ();
-    }
-}
+var game_table;
+// = new Array (dim);
+// for (var row = 0; row < dim; row++) {
+//     game_table[row] = new Array (dim);
+//     for (var col = 0; col < dim; col++) {
+//         game_table[row][col] = new Object ();
+//     }
+// }
 
 /* Create the initial random table. */
 
@@ -194,18 +195,19 @@ function create_table ()
     moves = -1;
     finished = false;
     var game_table_element = get_by_id ("game-table-tbody");
-    for (var row = 0; row < n_rows; row++) {
+    for (var row = 0; row < dim; row++) {
         var tr = create_node ("tr", game_table_element);
-        for (var col = 0; col < n_cols; col++) {
+        for (var col = 0; col < dim; col++) {
             var td = create_node ("td", tr);
             var colour = random_colour ();
             td.className = "piece " + colour;
             game_table[row][col].colour = colour;
-            start_table[row][col] = colour;
+            // start_table[row][col] = colour;
             game_table[row][col].element = td;
             game_table[row][col].flooded = false;
         }
     }
+    console.log(game_table);
     /* Mark the first element of the table as flooded. */
     game_table[0][0].flooded = true;
     /* Initialize the adjacent elements with the same colour to be flooded
@@ -223,9 +225,26 @@ function copyGrid(){
 
 function new_game ()
 {
+    console.clear();
+    var d = Number(get_by_id("dimension").value);
+    if (d < 3 || d > 15) {
+        alert("Dimension Field must in [3,15]");
+        return;
+    }
+    dim = d;
+
+    game_table = new Array (d);
+    for (var row = 0; row < d; row++) {
+        game_table[row] = new Array (d);
+        for (var col = 0; col < d; col++) {
+            game_table[row][col] = new Object ();
+        }
+    }
+    console.log(game_table)
     clear (get_by_id ("game-table-tbody"));
     clear (get_by_id ("game-answer"));
-    clear (get_by_id ("timer"))
+    clear (get_by_id ("timer"));
+    clear (get_by_id("automate"));
     create_table ();
 }
 
@@ -268,13 +287,25 @@ function translateTable(){
 
 
 function test(){
-    let numTable = [[0,2,3],
-                    [4,5,0],
-                    [4,5,0]];
-    let initialGrid = new GridState(numTable, null, null, 0);
+    console.log("test");
+    // let numTable = [[0,2,3],
+    //                 [4,5,0],
+    //                 [4,5,0]];
+    // let initialGrid = new GridState(numTable, null, null, 0);
     
     // console.log(heuristicColorsLeft(new GridState(numTable, null, null, 0)));
     // console.log(numTable.containsGrid([1,2,3]));
+}
+const  automateAnswer = async(answer) =>{
+    let colorButtons = document.getElementsByClassName("button");
+
+
+    const delay = ms => new Promise(res => setTimeout(res, ms));
+
+    for (color of answer){
+        await delay(500);
+        colorButtons[color-1].click();
+    }
 }
 function answerSetup(){
 
@@ -291,24 +322,30 @@ function answerSetup(){
 
     var value = Number(get_by_id("time-limit").value) < 2 ? 3 : Number(get_by_id("time-limit").value);
     
-    console.log(value);
+
     var limit = value < 3 ? 3 : value;
-    console.log(limit);
     
 
     var start = new Date().getTime();
-    console.log("Started...")
+    console.log("Search Started ...")
     answerGrid = AStar(initialGrid, heuristicAreaLeft, filtering=true, timeLimit = limit);
-    
+    answerKey = answerGrid.getAnswer();
     var end = new Date().getTime()
     
 
-    var timeElapsedSpan = get_by_id("timer")
-    timeElapsedSpan.innerHTML = "Time Elapsed: " + (end-start)/1000;
+ 
+    
+    
+    
+    
+    var tdTimer = get_by_id("timer");
+    tdTimer.innerHTML = "Time Elapsed: " + (end-start)/1000;
+    var tdAutomate = get_by_id("automate");
+    var automateBtn = create_node("button", tdAutomate); automateBtn.innerHTML = "Automate Answer";
+    automateBtn.addEventListener('click', function(){automateAnswer(answerKey)}, false);
+    
     var answerTR = get_by_id("game-answer");
-    
-    
-    for (var color of answerGrid.getAnswer()){
+    for (var color of answerKey){
         var td = create_node("td", answerTR);
 
         var colorString;
@@ -323,8 +360,9 @@ function answerSetup(){
 
         
     }
-    console.log("The Answer Grid", answerGrid);
-    console.log(answerGrid.getAnswer());
+    // console.log("The Answer Grid", answerGrid);
+    // console.log(answerGrid.getAnswer());
+    console.log("Answer found - Look at Website");
     console.log("Time: " + (end-start)/1000);
 
 }

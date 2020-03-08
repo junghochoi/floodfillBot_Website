@@ -51,9 +51,16 @@
                     <tr>
                         <td>
                             <label for="time-limit">Time Limit: </label>
-                            <input id="time-limit" type="number">
+                            <input id="time-limit"class="input-number" type="number">
                         </td>
                         
+                    </tr>
+                    <tr>
+                        <td>
+                            <label for="dimension">Dimension: </label>
+                            <input id="dimension" class="input-number" type="number" value="10">
+                        </td>
+
                     </tr>
 
 
@@ -80,20 +87,21 @@
         
     </table>
 
-    <table>
+    <table id="result">
         <tr id="timer">
-            <!-- <td class="font"> 
-                Time Elapsed: <span id="timer" class="font"></span>
-            </td> -->
-            
-            
+
         </tr>
+
+        <tr id="automate">
+           
+        </tr>
+      
         <tr>
-            <td>
+            
             <table>
                 <tr id="game-answer"></tr>
             </table>
-        </td>
+            
         </tr>
     </table>
 
