@@ -1,3 +1,16 @@
+.info{
+    margin: 5% 10%;
+    text-align: center;
+}
+
+.tables{
+    margin: auto;
+}
+
+.game {
+    margin: 5%;
+}
+
 .piece {
     width: 28px;
     height: 30px;
@@ -47,5 +60,5 @@ background-color: fuchsia;
 }
 
 .input-number{
-    width: 30px;
+    width: 40px;
 }

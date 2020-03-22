@@ -10,101 +10,135 @@
     <script src="PriorityQueue.js"></script>
     <script src="GridState.js"></script>
     <script src="script.js"></script>
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
 </head>
 
 <body>
-    <table>
-        <tr>
-            <td valign="top">
-                <table>
-                    <tr>
-                        <td valign="top">
-                            <table id="button-table">
-                                <tr>
-                                    <td class="button blue" onclick="flood ('blue')"></td>
-                                    <td class="button red" onclick="flood ('red')"></td>
-                                    <td class="button green" onclick="flood ('green')"></td>
-                                </tr>
-                                <tr>
-                                    <td class="button yellow" onclick="flood ('yellow')"></td>
-                                    <td class="button pink" onclick="flood ('pink')"></td>
-                                    <td class="button purple" onclick="flood ('purple')"></td>
-                                </tr>
-                            </table>
-                        </td>
-                    </tr>
-                    <tr valign="top">
-                        <td id="turn-counter" class="font" valign="top">
-                        Turn: <span id="moves"></span>/<span id="max-moves"></span>
-                        </td>
-                    </tr>
-                    <tr valign="top">
-                        <td valign="top">
-                        <input type="submit" value="New game" onclick="new_game ()">
-                        </td>
-                    </tr>
-                    <tr valign="top">
-                        <td valign="top">
-                        <input type="submit" value="Help" onclick="help ()">
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>
-                            <label for="time-limit">Time Limit: </label>
-                            <input id="time-limit"class="input-number" type="number">
-                        </td>
-                        
-                    </tr>
-                    <tr>
-                        <td>
-                            <label for="dimension">Dimension: </label>
-                            <input id="dimension" class="input-number" type="number" value="10">
-                        </td>
 
-                    </tr>
+    <div id="readme" class="info">
 
+        <div>
+            <h1>What is FloodFill?</h1>
 
-                    <tr valign="top">
-                        <td valign="top">
-                        <input type="submit" value="AI Answer" onclick="answerSetup()">
-                        </td>
-                    </tr>
+            <p>
+                FloodFill (aka. Flood-it, Globs) is a game where the objective is to fill a <span class="italics">N x N</span> grid with a single color. The player begins in the top-left corner tile. By picking a color from the 6 square buttons, the player's tiles will switch to that color and also expanding its tiles to surrounding tiles of the same color (its better just to see it happen).  If you fill the entire grid within 25 moves, YOU WIN! Give it your best shot.
+            </p>
 
-                </table>
-            </td>
-            <td>
-                <table id="game-table">
-                <!-- Internet Explorer insists that this must be tbody.
-                    See Dynamically created tables in Internet Explorer. -->
-                <tbody id="game-table-tbody">
-                </tbody>
-                </table>
-            </td>
-        </tr>
+            <p>
+                Too hard? Well.... there's an "artificial intelligence" feature that tries its best to find the path to a completed grid. Using the A* search algorithm and an estimating heuristic, it attempts to find a series of steps that user can take to fill the grid. The AI can always find a path to fill the grid... if it had infinitely many steps (just like a human can). Finding a path under 25 steps is much harder, and sometimes not achievable with this AI especially when the grid dimensions increase from 14 and up. 
+            </p>
 
+            <h3>How to Play</h3>
 
+            <p>Start off by clicking new game and clicking the 6 color squares to make your move, if you would like to play yourself. If you've given up, you can have the AI solve it for you. Start a new game and click "AI Answer". From anywhere from 0.00001 seconds to the time limit number in the form, the AI will reveal a path of steps in the form of a row of color squares. Either click them individually, or press "Automate Answer" to have the AI do it for you. Feel free to tinker with the dimension size and time limit. Too see how the AI is working in the background, open up your Browser Javascript Console (most likely by pressing F12)</p>
+            <h6>Note: Dimension sizes range from [3,15]<br>The Time Limit is the maximum amount of seconds the AI is allowed to solve the grid (a big time limit will use your CPU alooot)</h6>
+        </div>
        
+
         
-    </table>
 
-    <table id="result">
-        <tr id="timer">
+    </div>
+    
+    <div id="game" class="container game center">
 
-        </tr>
+        
 
-        <tr id="automate">
-           
-        </tr>
-      
-        <tr>
+        
+        <table class="tables">
+            <tr>
+                <td valign="top">
+                    <table>
+                        <tr>
+                            <td valign="top">
+                                <table id="button-table">
+                                    <tr>
+                                        <td class="button blue" onclick="flood ('blue')"></td>
+                                        <td class="button red" onclick="flood ('red')"></td>
+                                        <td class="button green" onclick="flood ('green')"></td>
+                                    </tr>
+                                    <tr>
+                                        <td class="button yellow" onclick="flood ('yellow')"></td>
+                                        <td class="button pink" onclick="flood ('pink')"></td>
+                                        <td class="button purple" onclick="flood ('purple')"></td>
+                                    </tr>
+                                </table>
+                            </td>
+                        </tr>
+                        <tr valign="top">
+                            <td id="turn-counter" class="font" valign="top">
+                            Turn: <span id="moves"></span>/<span id="max-moves"></span>
+                            </td>
+                        </tr>
+                        <tr valign="top">
+                            <td valign="top">
+                            <input type="submit" value="New game" onclick="new_game ()">
+                            </td>
+                        </tr>
+                        
+                        <tr>
+                            <td>
+                                <label for="dimension">Dimension: </label>
+                                <input id="dimension" class="input-number" type="number" value="10">
+                            </td>
+
+                        </tr>
+
+                        <tr>
+                            <td>
+                                <label for="time-limit">Time Limit: </label>
+                                <input id="time-limit"class="input-number" type="number" value="4">
+                            </td>
+                            
+                        </tr>
+                        
+
+
+                        <tr valign="top">
+                            <td valign="top">
+                            <input type="submit" value="AI Answer" onclick="answerSetup()">
+                            </td>
+                        </tr>
+
+                    </table>
+                </td>
+                <td>
+                    <table id="game-table">
+                    <!-- Internet Explorer insists that this must be tbody.
+                        See Dynamically created tables in Internet Explorer. -->
+                    <tbody id="game-table-tbody">
+                    </tbody>
+                    </table>
+                </td>
+            </tr>
+
+
+        
+        
+        </table>
+
+        <table id="result" class="tables">
+            <tr id="timer">
+
+            </tr>
+
+            <tr id="automate">
+            </tr>
+        
             
-            <table>
-                <tr id="game-answer"></tr>
-            </table>
+        </table>
+        
+        <table class="tables">
             
-        </tr>
-    </table>
+            <tr id="game-answer">
 
+            </tr>
+        </table>
+       
+       
+
+
+
+    
     
 </body>
 

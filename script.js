@@ -161,13 +161,6 @@ function all_flooded ()
 
 
 
-function help ()
-{
-    alert ("Press the circle buttons to flood fill the image\n"+
-           "with the colour from the top left corner. Fill the\n"+
-           "entire image with the same colour in twenty-five or\n"+
-           "fewer flood fills.");
-}
 
 /* Create a random colour for "create_table". */
 
@@ -207,7 +200,7 @@ function create_table ()
             game_table[row][col].flooded = false;
         }
     }
-    console.log(game_table);
+  
     /* Mark the first element of the table as flooded. */
     game_table[0][0].flooded = true;
     /* Initialize the adjacent elements with the same colour to be flooded
@@ -240,9 +233,10 @@ function new_game ()
             game_table[row][col] = new Object ();
         }
     }
-    console.log(game_table)
+    
     clear (get_by_id ("game-table-tbody"));
-    clear (get_by_id ("game-answer"));
+    if (get_by_id("game-answer") != null)  clear (get_by_id ("game-answer"));
+   
     clear (get_by_id ("timer"));
     clear (get_by_id("automate"));
     create_table ();
@@ -309,7 +303,8 @@ const  automateAnswer = async(answer) =>{
 }
 function answerSetup(){
 
-    if (get_by_id("game-answer").hasChildNodes()){
+    
+    if (get_by_id("game-answer") != null && get_by_id("game-answer").hasChildNodes()){
         alert("Answer Already Found. Make a new Game")
         return;
     }
@@ -345,6 +340,13 @@ function answerSetup(){
     automateBtn.addEventListener('click', function(){automateAnswer(answerKey)}, false);
     
     var answerTR = get_by_id("game-answer");
+    // -----
+    // var answerTable = create_node("table", get_by_id("game"));
+    // answerTable.classList.add("tables");
+    // answerTable.id="game-answer";
+    // var answerTR = create_node("tr", answerTable);
+
+    answerTR.classList.add("tables");
     for (var color of answerKey){
         var td = create_node("td", answerTR);
 
@@ -362,7 +364,12 @@ function answerSetup(){
     }
     // console.log("The Answer Grid", answerGrid);
     // console.log(answerGrid.getAnswer());
-    console.log("Answer found - Look at Website");
+    if (answerKey.length > 25){
+        console.log("No path found in time Limit: Look at Website\nNumber of Steps: " + answerKey.length)
+    }else{
+        console.log("Answer found - Look at Website\nNumber of Steps: " + answerKey.length);
+    }
+    
     console.log("Time: " + (end-start)/1000);
 
 }
@@ -406,14 +413,7 @@ function heuristicBottomRight(gridState){
 }
 
 function heuristicColorsLeft(gridState){
-    // for (var row = 0; row < gridState.dim; row++){
-    //     for (var col = 0; row < gridState.dim; col++){
-    //         if (gridState[row][col] == 0) break;
-    //         if 
-
-    //     }
-    // }
-    
+  
     let numColors = 0;
     colors = [1,2,3,4,5,6]
 
@@ -507,70 +507,6 @@ function AStar (
     return bestNode;
 }
 
-/*
-function AStar (
-    initialState,
-    heuristicFunction,
-    // isGoalState,
-    avoidBackTrack = false,
-    filtering = false,
-    cutoff = Number.MAX_SAFE_INTEGER,
-    counter = {
-        numEnqueues: 0,
-        numExtends: 0
-    }
-){
-    let frontier = new PriorityQueue()
-    frontier.enqueue(initialState, initialState.getPathLength() + heuristicFunction(initialState))
-    extended = new Array(0);
-
-    while (!frontier.isEmpty()){
-        qElement = frontier.dequeue();
-        extNode = qElement.element;
-        counter.numExtends += 1;
-
-        // console.log(extNode);
-        // if (isGoalState(extNode)){
-        //     return extNode;
-        // }
-
-        if(extNode.isGoalState()){
-            return extNode;
-        }
-        var enqueue;
-        if (filtering){
-            if (!extended.containsGrid(extNode.colorGrid)){
-                extended.push(extNode.colorGrid);
-                enqueue = extNode.generateNextStates();
-            } else{
-                // console.log("Filtered")
-                continue;
-            }
-        } else{
-            enqueue = extNode.generateNextStates();
-        }
-        
-
-        if (cutoff!=Number.MAX_SAFE_INTEGER){
-            for (var node of enqueue){
-                if (node.getPathLength() > cutoff){
-                    const index = enqueue.indexOf(5);
-                    if (index > -1) {
-                        array.splice(index, 1);
-                    }
-                }
-                    
-            }
-        }
-
-        counter.numEnqueues += enqueue.length;
-        for (var node of enqueue){
-            frontier.enqueue(node,node.getPathLength()+heuristicFunction(node));
-        }
-        
-    }
-    return null;
+window.onload = function(){
+    this.new_game();
 }
-
-
-*/
